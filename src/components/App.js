@@ -2,8 +2,6 @@ import { AppLayout } from './AppLayout';
 import { useState } from 'react';
 import { STATUS, PLAYER, WIN_PATTERNS } from '../constants';
 
-
-
 const checkWin = (field, currentPlayer) =>
 	WIN_PATTERNS.some((winPattern) =>
 		winPattern.every((cellIndex) => field[cellIndex] === currentPlayer),
