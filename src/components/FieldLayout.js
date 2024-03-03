@@ -1,8 +1,6 @@
 import styles from '../styles/field.module.css';
-import {store} from '../redux/store'
-const{field}= store.getState();
 
-export const FieldLayout = ({ onClick }) => (
+export const FieldLayout = ({ field, onClick }) => (
 	<div className={styles.container}>
 		<div className={styles.field}>
 			{field.map((item, index) => (

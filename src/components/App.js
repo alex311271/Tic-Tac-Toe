@@ -2,6 +2,7 @@ import { AppLayout } from './AppLayout';
 import { STATUS, PLAYER, WIN_PATTERNS } from '../constants';
 import { store } from '../redux/store';
 import { initialState } from '../redux/app-reducer';
+import { useUpdateState } from '../use-update-state';
 // import { useEffect } from 'react';
 
 const checkWin = (array, item) =>
@@ -12,12 +13,15 @@ const checkWin = (array, item) =>
 const checkEmptyCell = (array) => array.some((item) => item === '');
 
 export const App = () => {
+	const updateStateFunc = useUpdateState();
+
 	const handleRestart = () => {
+		updateStateFunc();
 		store.dispatch({ type: 'SET_PLAY_DATA', payload: initialState });
 	};
 	const handleCellClick = (index) => {
+		updateStateFunc();
 		const { status, field, currentPlayer } = store.getState();
-
 		if (status === STATUS.WIN || status === STATUS.DRAW || field[index] !== '') {
 			return;
 		}
