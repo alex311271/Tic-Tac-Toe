@@ -1,49 +1,44 @@
 import { AppLayout } from './AppLayout';
-import { useState } from 'react';
 import { STATUS, PLAYER, WIN_PATTERNS } from '../constants';
+import { store } from '../redux/store';
+import { initialState } from '../redux/app-reducer';
+// import { useEffect } from 'react';
 
-const checkWin = (field, currentPlayer) =>
+const checkWin = (array, item) =>
 	WIN_PATTERNS.some((winPattern) =>
-		winPattern.every((cellIndex) => field[cellIndex] === currentPlayer),
+		winPattern.every((cellIndex) => array[cellIndex] === item),
 	);
 
-const checkEmptyCell = (field) => field.some((cell) => cell === '');
+const checkEmptyCell = (array) => array.some((item) => item === '');
 
 export const App = () => {
-	const [currentPlayer, setCurrentPlayer] = useState(PLAYER.CROSS);
-	const [status, setStatus] = useState(STATUS.TURN);
-	const [field, setField] = useState(['', '', '', '', '', '', '', '', '']);
-
 	const handleRestart = () => {
-		setCurrentPlayer(PLAYER.CROSS);
-		setStatus(STATUS.TURN);
-		setField(['', '', '', '', '', '', '', '', '']);
+		store.dispatch({ type: 'SET_PLAY_DATA', payload: initialState });
 	};
 	const handleCellClick = (index) => {
+		const { status, field, currentPlayer } = store.getState();
+
 		if (status === STATUS.WIN || status === STATUS.DRAW || field[index] !== '') {
 			return;
 		}
 		const newField = [...field];
 		newField[index] = currentPlayer;
-		setField(newField);
+		store.dispatch({ type: 'SET_FIELD', payload: newField });
+
 		if (checkWin(newField, currentPlayer)) {
-			setStatus(STATUS.WIN);
+			store.dispatch({ type: 'SET_STATUS', payload: STATUS.WIN });
 		} else if (checkEmptyCell(newField)) {
-			setCurrentPlayer(currentPlayer === PLAYER.CROSS ? PLAYER.ZERO : PLAYER.CROSS);
+			currentPlayer === PLAYER.CROSS
+				? store.dispatch({ type: 'SET_CURRENT_PLAYER', payload: PLAYER.ZERO })
+				: store.dispatch({ type: 'SET_CURRENT_PLAYER', payload: PLAYER.CROSS });
 		} else {
-			setStatus(STATUS.DRAW);
+			store.dispatch({ type: 'SET_STATUS', payload: STATUS.DRAW });
 		}
 	};
+
 	return (
 		<>
-			<AppLayout
-				handleRestart={handleRestart}
-				field={field}
-				currentPlayer={currentPlayer}
-				setCurrentPlayer={setCurrentPlayer}
-				status={status}
-				handleCellClick={handleCellClick}
-			></AppLayout>
+			<AppLayout handleRestart={handleRestart} handleCellClick={handleCellClick} />
 		</>
 	);
 };
