@@ -1,4 +1,6 @@
-import { useSelector, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
+import { Component } from 'react';
+import PropTypes from 'prop-types';
 import { AppLayout } from './AppLayout';
 import { STATUS, PLAYER, WIN_PATTERNS } from '../constants';
 import { selectField, selectCurrentPlayer, selectStatus } from '../selectors/index';
@@ -11,16 +13,18 @@ const checkWin = (field, currentPlayer) =>
 
 const checkEmptyCell = (array) => array.some((item) => item === '');
 
-export const App = () => {
-	const field = useSelector(selectField);
-	const currentPlayer = useSelector(selectCurrentPlayer);
-	const status = useSelector(selectStatus);
-	const dispatch = useDispatch();
-
-	const handleRestart = () => {
+export class AppContainer extends Component {
+	constructor(props) {
+		super(props);
+		this.handleRestart = this.handleRestart.bind(this);
+		this.handleCellClick = this.handleCellClick.bind(this);
+	}
+	handleRestart() {
+		const { dispatch } = this.props;
 		dispatch(RESTART_GAME);
-	};
-	const handleCellClick = (index) => {
+	}
+	handleCellClick(index) {
+		const { status, currentPlayer, field, dispatch } = this.props;
 		if (status === STATUS.WIN || status === STATUS.DRAW || field[index] !== '') {
 			return;
 		}
@@ -29,21 +33,39 @@ export const App = () => {
 		dispatch(setField(newField));
 		if (checkWin(newField, currentPlayer)) {
 			dispatch(setStatus(STATUS.WIN));
-		} else  if (checkEmptyCell(newField)) {
+		} else if (checkEmptyCell(newField)) {
 			currentPlayer === PLAYER.CROSS
-			? dispatch(setCurrentPlayer(PLAYER.ZERO))
-			: dispatch(setCurrentPlayer(PLAYER.CROSS));
-			} else {
-				dispatch(setStatus(STATUS.DRAW));
+				? dispatch(setCurrentPlayer(PLAYER.ZERO))
+				: dispatch(setCurrentPlayer(PLAYER.CROSS));
+		} else {
+			dispatch(setStatus(STATUS.DRAW));
 		}
 		console.log(checkEmptyCell(field), currentPlayer);
-	};
-	return (
-		<>
-			<AppLayout
-				handleRestart={handleRestart}
-				handleCellClick={handleCellClick}
-			></AppLayout>
-		</>
-	);
+	}
+	render() {
+		return (
+			<>
+				<AppLayout
+					handleRestart={this.handleRestart}
+					handleCellClick={this.handleCellClick}
+					field={this.props.field}
+				></AppLayout>
+			</>
+		);
+	}
+}
+
+const mapStateToProps = (state) => ({
+	status: selectStatus(state),
+	currentPlayer: selectCurrentPlayer(state),
+	field: selectField(state),
+});
+
+export const App = connect(mapStateToProps)(AppContainer);
+
+AppContainer.propTypes = {
+	status: PropTypes.oneOf(Object.values(STATUS)).isRequired,
+	currentPlayer: PropTypes.oneOf(Object.values(PLAYER)).isRequired,
+	field: PropTypes.arrayOf(PropTypes.oneOf(Object.values(PLAYER))).isRequired,
+	dispatch: PropTypes.func.isRequired,
 };

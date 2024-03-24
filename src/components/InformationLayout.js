@@ -1,7 +1,18 @@
-import styles from '../styles/information.module.css';
+import { Component } from 'react';
+import PropTypes from 'prop-types';
 
-export const InformationLayout = ({ textInformation }) => (
-	<div className={styles.information}>
-		<p className={styles.information__text}>{textInformation}</p>
-	</div>
-);
+export class InformationLayout extends Component {
+	render() {
+		return (
+			<>
+				<p className="text-2xl font-semibold m-5 text-sky-400 ">
+					{this.props.textInformation}
+				</p>
+			</>
+		);
+	}
+}
+
+InformationLayout.propTypes = {
+	textInformation: PropTypes.string,
+};
